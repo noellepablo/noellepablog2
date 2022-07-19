@@ -1,0 +1,20 @@
+---
+title: Olympics Shiny App
+author: Noelle Pablo
+date: '2021-11-21'
+slug: olympics-shiny-app
+categories: []
+tags:
+  - shiny
+  - r
+  - olympics
+output:
+  blogdown::html_page:
+    toc: false
+runtime: shiny
+---
+During summer 2021, I took a [data visualization and acquisition course](https://catalog.ku.edu/search/?P=DATA%20824) at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program. The final project of the course was to visualize real world data interactively by creating an R Shiny app. While brainstorming ideas for my Shiny app, I found a historical Olympic Games data set from the Tidy Tuesday weekly data project located in the [R for Data Science GitHub repository](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-07-27). At the time this data set was posted, the 2020 Summer Olympics were taking place in Tokyo, Japan.^[Due to the COVID-19 pandemic, the 2020 summer games were postponed to summer 2021.] The data set contains the outcomes of the modern Olympic Games from Athens 1896 to Rio 2016. I decided to create a Shiny app to visualize the top teams in each games, along with the medal summary for each event. Users can select a season (summer or winter), year, sport, and event. After the user makes their selections, a bar chart featuring the top teams by number of medals won is displayed. The location of the games and number of participating teams can be found above the bar chart. Lastly, the medal summary is displayed in a data table below the bar chart. 
+
+<iframe height="800" width="100%" frameborder="no" src="https://noelle-pablo.shinyapps.io/olympics-app/"> </iframe>
+
+The code for the Shiny app can be found on my [GitHub](https://github.com/noellepablo/olympics-app).

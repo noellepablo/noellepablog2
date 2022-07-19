@@ -1,0 +1,41 @@
+---
+title: Cleaning HTML Code in R
+author: Noelle Pablo
+date: '2021-07-20'
+slug: cleaning-html-code-in-r
+categories: []
+tags: []
+---
+
+<script src="index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Working at <a href="https://atlas.ku.edu/">ATLAS</a> involves a lot of student assessment data, including text responses. For certain projects, the data are sent to our team with residual HTML code in the text response strings, for example, <code>It's</code> might appear as <code>It&amp;#39;s</code>, since the HTML code for an apostrophe is denoted by <code>&amp;#39;</code>. To make these responses more readable, it is helpful to clean, or replace, the HTML markup with the equivalent symbols.</p>
+<p>The response data I most recently cleaned contained HTML code and various Unicode numbers, such as <code>U+200B</code>, which represents a zero width space. To clean the HTML code and Unicode numbers from the response strings, I used a combination of the <code>replace_html()</code> function within the <code>textclean</code> package and the <code>HTMLdecode()</code> function within the <code>textutils</code> package. Both functions were needed since there are some Unicode numbers that <code>replace_html()</code> recognizes that <code>HTMLdecode()</code> does not, and vice versa.</p>
+<pre class="r"><code>responses &lt;- c(&quot;It&amp;#39;s a beautiful day&quot;, 
+                  &quot;I like&amp;nbsp;to go fishing&quot;,
+                  &quot;Jack &amp;amp; Jill went up the hill&quot;,
+                  &quot;hello&lt;U+200B&gt;&quot;)
+textclean::replace_html(responses)</code></pre>
+<pre><code>## [1] &quot;It&amp;#39;s a beautiful day&quot;     &quot;I like to go fishing&quot;        
+## [3] &quot;Jack &amp; Jill went up the hill&quot; &quot;hello &quot;</code></pre>
+<pre class="r"><code>textutils::HTMLdecode(responses)</code></pre>
+<pre><code>## [1] &quot;It&#39;s a beautiful day&quot;         &quot;I like to go fishing&quot;        
+## [3] &quot;Jack &amp; Jill went up the hill&quot; &quot;hello&lt;U+200B&gt;&quot;</code></pre>
+<p>As seen in the example above, <code>replace_html()</code> does not replace <code>&amp;#39;</code> with an apostrophe, and <code>HTMLdecode()</code> does not replace <code>&lt;U+200B&gt;</code> with a zero width space, so both functions must be used together to properly clean the HTML and Unicode markup.</p>
+<p>The residual HTML code and Unicode numbers were present in student responses across multiple files. Rather than copying and pasting these two functions for each file, I wrote a function to read in the file, apply both functions to the column containing the response strings, and save the file under a new name.</p>
+<pre class="r"><code>fix_html &lt;- function(file){
+  data &lt;- readr::read_csv(file)
+  newfilename &lt;- stringr::str_replace(file, &quot;.csv&quot;, &quot;_noCode.xlsx&quot;)
+  data %&gt;% 
+    mutate(new_readableresponse = textutils::HTMLdecode(response),
+           new_readableresponse = textclean::replace_html(new_readableresponse)) %&gt;% 
+    openxlsx::write.xlsx(file = newfilename)
+}</code></pre>
+<p>The function accepts one argument, <code>file</code>, which represents the file name. The first line of the function reads in the file (in this case, it is a .csv file), and the second line of the function creates a new file name, which is the same as the original file name, but with a "_noCode.xlsx" suffix. I chose to save the file with an .xlsx extension to avoid any formatting issues which sometimes occur with .csv files. The remaining lines in the function apply the <code>HTMLdecode()</code> and <code>replace_html()</code> functions to the <code>response</code> column in the data and save the results in a <code>new_readableresponse</code> column. Lastly, the data is written to a new file.</p>
+<p>To further automate the HTML/Unicode cleaning process, I created a vector of all the files in the folder that needed to be cleaned and passed that vector to the <code>fix_html()</code> function using <code>purrr::map()</code>.</p>
+<pre class="r"><code>filepath &lt;- &quot;S:/Projects/writing/grade9-12/&quot;
+files &lt;- list.files(filepath, full.names = TRUE)
+
+purrr::map(files, fix_html)</code></pre>
+<p>The <code>purrr::map()</code> function is very useful when applying a function to a vector or list. In this case, I applied, or mapped, my newly created function <code>fix_html()</code> to a vector of file names. The final results were new versions of each file that included a new, readable response column without any HTML or Unicode numbers.</p>

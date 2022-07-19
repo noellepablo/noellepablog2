@@ -1,0 +1,48 @@
+---
+title: Cleaning HTML Code in R
+author: Noelle Pablo
+date: '2021-07-20'
+slug: cleaning-html-code-in-r
+categories: []
+tags: []
+---
+
+Working at [ATLAS](https://atlas.ku.edu/) involves a lot of student assessment data, including text responses. For certain projects, the data are sent to our team with residual HTML code in the text response strings, for example, `It's` might appear as `It&#39;s`, since the HTML code for an apostrophe is denoted by `&#39;`. To make these responses more readable, it is helpful to clean, or replace, the HTML markup with the equivalent symbols.
+
+The response data I most recently cleaned contained HTML code and various Unicode numbers, such as `U+200B`, which represents a zero width space. To clean the HTML code and Unicode numbers from the response strings, I used a combination of the `replace_html()` function within the `textclean` package and the `HTMLdecode()` function within the `textutils` package. Both functions were needed since there are some Unicode numbers that `replace_html()` recognizes that `HTMLdecode()` does not, and vice versa.
+
+```{r example-html-cleaning}
+responses <- c("It&#39;s a beautiful day", 
+                  "I like&nbsp;to go fishing",
+                  "Jack &amp; Jill went up the hill",
+                  "hello<U+200B>")
+textclean::replace_html(responses)
+textutils::HTMLdecode(responses)
+```
+As seen in the example above, `replace_html()` does not replace `&#39;` with an apostrophe, and `HTMLdecode()` does not replace `<U+200B>` with a zero width space, so both functions must be used together to properly clean the HTML and Unicode markup.
+
+The residual HTML code and Unicode numbers were present in student responses across multiple files. Rather than copying and pasting these two functions for each file, I wrote a function to read in the file, apply both functions to the column containing the response strings, and save the file under a new name. 
+
+```{r example-html-cleaning-function}
+fix_html <- function(file){
+  data <- readr::read_csv(file)
+  newfilename <- stringr::str_replace(file, ".csv", "_noCode.xlsx")
+  data %>% 
+    mutate(new_readableresponse = textutils::HTMLdecode(response),
+           new_readableresponse = textclean::replace_html(new_readableresponse)) %>% 
+    openxlsx::write.xlsx(file = newfilename)
+}
+```
+
+The function accepts one argument, `file`, which represents the file name. The first line of the function reads in the file (in this case, it is a .csv file), and the second line of the function creates a new file name, which is the same as the original file name, but with a "_noCode.xlsx" suffix. I chose to save the file with an .xlsx extension to avoid any formatting issues which sometimes occur with .csv files. The remaining lines in the function apply the `HTMLdecode()` and `replace_html()` functions to the `response` column in the data and save the results in a `new_readableresponse` column. Lastly, the data is written to a new file.
+
+To further automate the HTML/Unicode cleaning process, I created a vector of all the files in the folder that needed to be cleaned and passed that vector to the `fix_html()` function using `purrr::map()`.
+
+```{r eval=F}
+filepath <- "S:/Projects/writing/grade9-12/"
+files <- list.files(filepath, full.names = TRUE)
+
+purrr::map(files, fix_html)
+```
+
+The `purrr::map()` function is very useful when applying a function to a vector or list. In this case, I applied, or mapped, my newly created function `fix_html()` to a vector of file names. The final results were new versions of each file that included a new, readable response column without any HTML or Unicode numbers.

@@ -1,0 +1,385 @@
+---
+title: An Investigation of the Bechdel Test Using Logistic Regression
+author: Noelle Pablo
+date: '2022-01-30'
+slug: bechdel-test-regression
+categories: []
+tags:
+  - bechdel test
+  - logistic regression
+  - categorical data
+  - tidy tuesday
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+<script src="{{< blogdown/postref >}}index_files/kePrint/kePrint.js"></script>
+<link href="{{< blogdown/postref >}}index_files/lightable/lightable.css" rel="stylesheet" />
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Last spring, I took a categorical data analysis course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program. For our final project, we were asked to find a data set, form a research question, and conduct a series of analyses to answer that research question. While looking for inspiration for my final project, I found a Bechdel test data set containing the Bechdel test ratings for films released between 1970 and 2013 on the <a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-03-09">Tidy Tuesday weekly data project</a> which was originally used in a FiveThirtyEight article titled <a href="https://fivethirtyeight.com/features/the-dollar-and-cents-case-against-hollywoods-exclusion-of-women/">The Dollar-And-Cents Case Against Hollywood’s Exclusion of Women</a>. This post provides an overview of the analyses and findings from that data set.</p>
+</div>
+<div id="background-and-analysis-objective" class="section level1">
+<h1>Background and Analysis Objective</h1>
+<p>One metric of female representation in film is the Bechdel test. The Bechdel test is a set of criteria used to measure the representation of women in films. The test was popularized by Alison Bechdel’s comic strip titled <a href="https://dykestowatchoutfor.com/wp-content/uploads/2014/05/The-Rule-cleaned-up.jpg">The Rule</a>. In order to pass the “rule”, now known as the Bechdel test, a movie must satisfy the following requirements: 1. At least two named women appear in the film; 2. The two named women speak to each other; 3. The two named women speak to each other about something other than a man. <a href="https://editorial.rottentomatoes.com/guide/best-movies-2021/">Rotten Tomatoes’ 30 Best Films of 2021 list</a> features 17 (57%) movies that fully pass the Bechdel test, 4 movies that fail the Bechdel test due to no named women characters, and 9 movies where a Bechdel rating was unavailable or non-applicable as the film was a non-fiction documentary.</p>
+<p>The primary objective of this analysis was to understand which factors explain the difference between films’ Bechdel test rating by building a logistic regression model with Bechdel test rating as the main outcome of interest.</p>
+</div>
+<div id="data-preprocessing" class="section level1">
+<h1>Data Preprocessing</h1>
+<p>The main outcome of interest was the Bechdel rating, which is categorized into three ordered responses: <code>1</code> = two named women, <code>2</code> = who speak to each other, and <code>3</code> = about something other than a man. The potential explanatory variables were movie budget (inflation-adjusted to 2013), MPAA rating, language, and year. Due to strong positive-skewness present in the budget variable, budget was transformed using the logarithm function with base two. Two was chosen as the logarithm base so that the interpretation would involve a doubling or two-fold increase of budget. Using a logarithm transformation on budget is sensible, as a $1000 increase in budget is much larger for a $10,000 movie than a $1,000,000 movie. The language variable was redefined as a dichotomous variable indicating whether only one language (<code>0</code>) or multiple languages were spoken in the film (<code>1</code>). Table 1 displays a sample of six films from the data. The raw budget is presented in Table 1, but the log-transformed budget was used in the regression model.</p>
+<pre class="r"><code>tuesdata &lt;- tidytuesdayR::tt_load(&#39;2021-03-09&#39;)</code></pre>
+<pre><code>## 
+##  Downloading file 1 of 2: `raw_bechdel.csv`
+##  Downloading file 2 of 2: `movies.csv`</code></pre>
+<pre class="r"><code>bechdel &lt;- tuesdata$raw_bechdel
+
+movies &lt;- tuesdata$movies
+
+moviesclean &lt;- movies %&gt;% 
+  mutate(imdb = str_replace(imdb, &quot;tt&quot;, &quot;&quot;)) %&gt;% 
+  left_join(bechdel, by = c(&quot;imdb&quot; = &quot;imdb_id&quot;,
+                            &quot;year&quot;,
+                            &quot;title&quot;)) %&gt;% 
+  distinct(year, imdb, title, budget_2013, 
+           rated, language, rating) %&gt;% 
+  filter(!is.na(rating) &amp; rating != 0) %&gt;% 
+  na.omit() %&gt;% 
+  mutate(numlanguages = str_count(language, &quot;\\S+&quot;),
+         bechdelrating = as_factor(rating),
+         rated = case_when(
+           rated == &quot;N/A&quot; | rated == &quot;Unrated&quot; ~ &quot;Not Rated&quot;,
+           rated == &quot;TV-PG&quot; ~ &quot;PG&quot;,
+           rated == &quot;TV-14&quot; ~ &quot;PG-13&quot;,
+           rated == &quot;X&quot; ~ &quot;NC-17&quot;,
+           TRUE ~ rated
+         ),
+         languagecat = case_when(
+           numlanguages == 1 ~ 0,
+           numlanguages &gt; 1 ~ 1
+         )) %&gt;% 
+  filter(rated != &quot;Not Rated&quot;) %&gt;% 
+  mutate(mpaa = fct_relevel(rated,
+                            levels = c(&quot;G&quot;, &quot;PG&quot;, &quot;PG-13&quot;, 
+                                       &quot;R&quot;, &quot;NC-17&quot;)),
+         languagecat = as_factor(languagecat),
+         logbudget = log2(budget_2013)) %&gt;% 
+  dplyr::select(imdb, title, year, budget_2013, 
+                logbudget, mpaa, languagecat, bechdelrating) %&gt;% 
+  rename(budget2013 = budget_2013) 
+
+bdl_model &lt;- VGAM::vglm(bechdelrating ~ logbudget + year 
+                        + languagecat,
+                  family = cumulative(parallel = TRUE),
+                  data = moviesclean)</code></pre>
+<table class="table lightable-classic" style="margin-left: auto; margin-right: auto; font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-2">Table 1: </span>Six Observations from The Movies Data Set
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Title
+</th>
+<th style="text-align:right;">
+Bechdel Rating
+</th>
+<th style="text-align:left;">
+Budget ($)
+</th>
+<th style="text-align:right;">
+Language
+</th>
+<th style="text-align:left;">
+Year
+</th>
+<th style="text-align:right;">
+MPAA Rating
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Good Morning, Vietnam
+</td>
+<td style="text-align:right;width: 2cm; ">
+1
+</td>
+<td style="text-align:left;width: 2cm; ">
+$26,655,166
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+1987
+</td>
+<td style="text-align:right;width: 2cm; ">
+R
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+The Princess Diaries
+</td>
+<td style="text-align:right;width: 2cm; ">
+3
+</td>
+<td style="text-align:left;width: 2cm; ">
+$39,475,379
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+2001
+</td>
+<td style="text-align:right;width: 2cm; ">
+G
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+The Help
+</td>
+<td style="text-align:right;width: 2cm; ">
+3
+</td>
+<td style="text-align:left;width: 2cm; ">
+$25,892,270
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+2011
+</td>
+<td style="text-align:right;width: 2cm; ">
+PG-13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+The Departed
+</td>
+<td style="text-align:right;width: 2cm; ">
+1
+</td>
+<td style="text-align:left;width: 2cm; ">
+$104,021,671
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+2006
+</td>
+<td style="text-align:right;width: 2cm; ">
+R
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+All About Steve
+</td>
+<td style="text-align:right;width: 2cm; ">
+3
+</td>
+<td style="text-align:left;width: 2cm; ">
+$16,285,974
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+2009
+</td>
+<td style="text-align:right;width: 2cm; ">
+PG-13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hedwig and the Angry Inch
+</td>
+<td style="text-align:right;width: 2cm; ">
+3
+</td>
+<td style="text-align:left;width: 2cm; ">
+$7,895,076
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+2001
+</td>
+<td style="text-align:right;width: 2cm; ">
+R
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<p>The final model for the data includes log budget, number of languages, and year as explanatory variables. The cumulative logit model with proportional odds can be written as:</p>
+<p><span class="math inline">\(logit(\hat{P}(Y \leq j)) = \alpha_j + \beta_{budget}x_{budget} + \beta_{language}x_{language} + \beta_{year}x_{year}, j = 1, 2\)</span></p>
+<p>Table 2 displays inferential statistics from the final cumulative logit model with proportional odds. Under this model, for every two-fold increase in budget, the odds of being further away from fully passing the Bechdel test, i.e., receiving a Bechdel rating of 2 or 1, increase by <span class="math inline">\(e^{0.115} = 1.12\)</span>, or 12% (95% CI: 1.06, 1.19) after holding language and year constant. The negative coefficient of the <code>year</code> variable (<span class="math inline">\(\beta_{year}\)</span> = -0.02) suggests that older movies are relatively less likely of fully passing the Bechdel test. For movies with more than one language spoken in the film, the odds of being further away from passing the Bechdel test are <span class="math inline">\(e^{0.291} = 1.34\)</span> (95% CI: 1.08, 1.66) times that of movies where only one language is spoken in the film after holding budget and year constant.</p>
+<table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-3">Table 2: </span>Summary of Cumulative Logit Model with Proportional Odds with Selected Variables
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std. Error
+</th>
+<th style="text-align:right;">
+z value
+</th>
+<th style="text-align:right;">
+Pr(&gt;|z|)
+</th>
+<th style="text-align:right;">
+2.5 %
+</th>
+<th style="text-align:right;">
+97.5 %
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept):1
+</td>
+<td style="text-align:right;">
+39.107
+</td>
+<td style="text-align:right;">
+11.467
+</td>
+<td style="text-align:right;">
+3.410
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+16.632
+</td>
+<td style="text-align:right;">
+61.582
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+(Intercept):2
+</td>
+<td style="text-align:right;">
+39.578
+</td>
+<td style="text-align:right;">
+11.468
+</td>
+<td style="text-align:right;">
+3.451
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+<td style="text-align:right;">
+17.100
+</td>
+<td style="text-align:right;">
+62.055
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+logbudget
+</td>
+<td style="text-align:right;">
+0.115
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+3.896
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.057
+</td>
+<td style="text-align:right;">
+0.173
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+year
+</td>
+<td style="text-align:right;">
+-0.021
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+-3.734
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+-0.033
+</td>
+<td style="text-align:right;">
+-0.010
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+languagecat1
+</td>
+<td style="text-align:right;">
+0.291
+</td>
+<td style="text-align:right;">
+0.109
+</td>
+<td style="text-align:right;">
+2.683
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+0.078
+</td>
+<td style="text-align:right;">
+0.504
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>Overall, film budget, year of film release, and number of languages spoken in the film
+each seem to have a statistically significant relationship with Bechdel rating, after holding the other variables constant. Bechdel rating appears to have a negative relationship with budget; films with higher budgets tend to have lower Bechdel ratings. There is also evidence of a negative association between Bechdel rating and number of languages; films with more than one language spoken tend to have lower Bechdel ratings. Lastly, films released more recently are relatively more likely to pass the Bechdel test than older movies.</p>
+<p>While the Bechdel test is an easily measurable rating of women representation, it
+is unable to capture neither the depth of the women characters, nor the quality of the
+conversations between the women, and therefore should not be the only measure of women
+representation and gender equality in movies. Future research should include more sensitive alternatives for measuring female representation.</p>
+</div>

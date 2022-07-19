@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Noelle Pablo</title>
+    <link>https://example.com/post/</link>
+    <description>Recent content in Posts on Noelle Pablo</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 02 May 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://example.com/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Finding the Most Recent Weekday Date Using lubridate</title>
+      <link>https://example.com/post/finding-the-most-recent-weekday-date-using-lubridate/</link>
+      <pubDate>Mon, 02 May 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://example.com/post/finding-the-most-recent-weekday-date-using-lubridate/</guid>
+      
+        <description></description>
+      
+    </item>
+    
+    <item>
+      <title>Principal Components Analysis in R: College Sports</title>
+      <link>https://example.com/post/principal-components-analysis-collegiate-sports/</link>
+      <pubDate>Wed, 30 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://example.com/post/principal-components-analysis-collegiate-sports/</guid>
+      
+        <description>Last fall, I took a multivariate statistics course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program.</description>
+      
+    </item>
+    
+    <item>
+      <title>An Investigation of the Bechdel Test Using Logistic Regression</title>
+      <link>https://example.com/post/bechdel-test-regression/</link>
+      <pubDate>Sun, 30 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://example.com/post/bechdel-test-regression/</guid>
+      
+        <description>IntroductionLast spring, I took a categorical data analysis course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program.</description>
+      
+    </item>
+    
+    <item>
+      <title>Olympics Shiny App</title>
+      <link>https://example.com/post/olympics-shiny-app/</link>
+      <pubDate>Sun, 21 Nov 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://example.com/post/olympics-shiny-app/</guid>
+      
+        <description>During summer 2021, I took a data visualization and acquisition course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program.</description>
+      
+    </item>
+    
+    <item>
+      <title>Cleaning HTML Code in R</title>
+      <link>https://example.com/post/cleaning-html-code-in-r/</link>
+      <pubDate>Tue, 20 Jul 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://example.com/post/cleaning-html-code-in-r/</guid>
+      
+        <description>Working at ATLAS involves a lot of student assessment data, including text responses.</description>
+      
+    </item>
+    
+  </channel>
+</rss>

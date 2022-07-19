@@ -1,0 +1,79 @@
+---
+title: 'Principal Components Analysis in R: College Sports'
+author: Noelle Pablo
+date: '2022-03-30'
+slug: principal-components-analysis-collegiate-sports
+categories: []
+tags:
+  - pca
+  - dimension reduction
+  - principal components analysis
+  - college sports
+---
+
+```{r include=FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(message = F,
+                      warning = F)
+```
+
+Last fall, I took a multivariate statistics course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program. One of the topics covered in the course was principal components analysis (PCA). PCA is commonly used when 1. there are a large number of numerical variables in a data set, and 2. the variables are strongly correlated with each other. After conducting a PCA, the correlated variables can be replaced by a smaller number of uncorrelated variables, known as the principal components. Each principal component is a linear combination of the original variables that represents most of the information, or variability, found in the original variables. 
+
+For this demonstration, I am using a data set on college sports provided by the [TidyTuesday data project](https://github.com/rfordatascience/tidytuesday/blob/master/data/2022/2022-03-29/readme.md). This data set contains several variables on athletic participation, staffing, and finances by college, sport, and team gender. Since the numeric variables are on different scales, e.g., `rev_women` is in dollars, while `partic_women` is counts of women, they will inevitably have different variances. To account for the different variances, we will perform a PCA on the correlation matrix which uses the standardized data, as opposed to the covariance matrix which uses the non-standardized data.
+
+Let's create a correlation heatmap using ggplot2 to visualize the correlations between the numerical variables. Figure 1 displays the Pearson correlation coefficient between all numerical variables in the college sports data set in a heatmap. 
+
+```{r,results='hide', fig.cap='College sports data correlation heatmap'}
+tuesdata <-
+  tidytuesdayR::tt_load('2022-03-29')
+
+sports <- tuesdata$sports %>%
+  select_if(is.numeric) %>%
+  select(-c(contains("code"), unitid, sector_cd))
+
+sports_corr <- round(cor(sports, use = "complete.obs"), 2) %>%
+  reshape2::melt()
+
+sports_corr %>%
+  ggplot(aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = value), color = "white", size = 2.2) +
+  coord_fixed() +
+  scale_fill_gradient2(low = "#E69F00",
+                       mid = "#56B4E9",
+                       high = "#009E73") +
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1)) +
+  labs(x = "", y = "",
+       fill = "corr")
+```
+
+From the heatmap, we can see strong linear correlations between several variables, such as: total number of female students (`ef_female_count`) and total number of male students (`ef_male_count)` (r = 0.94), number of women participants (`partic_women`) and number of male participants (`partic_male`) (r = 0.96), and revenue in USD for men (`rev_men`) and revenue in USD for women (`rev_women`) (r = 0.97). Pairs of variables with a correlation of nearly 1 are those that are used to calculate each other, for example, `total_rev_menwomen` is the sum of `rev_men` and `rev_women`. Let's remove these redundant variables and proceed to the next step.
+
+```{r}
+sports_data <- 
+  sports %>%
+  select(-contains("total"), -contains("sum"))
+```
+
+We can use the `prcomp()` function with the `scale.` argument set to `TRUE` to run our PCA on the normalized data. We can also use the `na.omit()` function to remove missing values. Due to the large amount of missing values in this data set, we are left with 16 complete observations. 
+
+The first four principal components account for 93.5% of the total variability in the original variables, in other words, we can explain most of the variability in the data using four principal components, rather than the original 13 variables. 
+```{r}
+sports_pc <- prcomp(na.omit(sports_data), scale. = TRUE)
+summary(sports_pc)
+```
+
+As a reminder, the principal components are linear combinations of the original variables that aim to contain most of the information and variability present in the original variables. The `prcomp()` function also saves the weights given to each variable within each component in the `rotation` element of the `prcomp()` output. We can see that the largest positive weights in the first principal component are for the revenue and expenditure variables. In the second principal component, the largest negative weight is for year, followed by the coed participation variables. These weights are then used to calculate principal component scores. 
+
+```{r}
+sports_pc$rotation[, 1:4]
+```
+
+The principal component scores are saved in the `x` element of the `prcomp()` output. High scores on the first principal component indicate that the revenue and expenditures of that college sport are high. High scores on the second principal component indicate that the year is further in the past and that coed participation is low.
+
+```{r}
+sports_pc$x[, 1:4]
+```
+
+If our goal is to reduce the number of predictors in the data, we can use the first four columns of principal component scores as our transformed predictors. These four transformed predictors are now able to explain 93.5% of variability that was present in the original 13 variables. However, it is important to keep in mind that PCA only focuses on the linear relationships between the original variables, and any information in nonlinear relationships is not captured. 

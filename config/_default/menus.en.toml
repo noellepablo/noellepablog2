@@ -11,12 +11,6 @@
   url = "/post/"
 
   [[main]]
-  name = "Portfolio"
-  weight = 300
-  identifier = "portfolio"
-  url = "/portfolio/"
-
-  [[main]]
   name = "About"
   weight = 400
   identifier = "about"
@@ -26,13 +20,6 @@
   name = "Accomplishments"
   weight = 500
   identifier = "accomplishments"
-
-  [[main]]
-  name = "Awards"
-  weight = 510
-  identifier = "awards"
-  url = "/awards/"
-  parent = "accomplishments"  
 
   [[main]]
   name = "Certifications"

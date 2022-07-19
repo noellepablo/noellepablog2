@@ -1,7 +1,7 @@
-baseURL = "https://example.com"
+baseURL = "https://noellepablo.com"
 languageCode = "en"
 DefaultContentLanguage = "en"
-title = "Website of Jane Doe"
+title = "Noelle Pablo's Data Science Blog"
 
 # theme as hugo module
 #theme = "github.com/lxndrblz/anatole"

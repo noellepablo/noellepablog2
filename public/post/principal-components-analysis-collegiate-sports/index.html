@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html
+  dir="ltr"
+  lang="en"
+  data-theme=""
+  class="html"
+><head>
+  <title>
+    
+      
+        Principal Components Analysis in R: College Sports |
+
+      Noelle Pablo
+
+  </title>
+
+  
+  <meta charset="utf-8" /><meta name="generator" content="Hugo 0.79.1" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="author" content="Noelle Pablo" />
+  <meta
+    name="description"
+    content=""
+  />
+  
+  
+    
+    
+    <link
+      rel="stylesheet"
+      href="/scss/main.min.f56f0970bc00d4c7ffdb126b93d067aa889f87a5604f2b2a77770478f3966a03.css"
+      integrity="sha256-9W8JcLwA1Mf/2xJrk9Bnqoifh6VgTysqd3cEePOWagM="
+      crossorigin="anonymous"
+      type="text/css"
+    />
+
+  
+
+  
+  <link
+    rel="stylesheet"
+    href="/css/markupHighlight.min.793b323d7f2d9fbfd0b93f4d593fb5ad77b918716ed33eddea403fa87f770403.css"
+    integrity="sha256-eTsyPX8tn7/QuT9NWT&#43;1rXe5GHFu0z7d6kA/qH93BAM="
+    crossorigin="anonymous"
+    type="text/css"
+  />
+  
+  
+  <link
+    rel="stylesheet"
+    href="/fontawesome/css/fontawesome.min.b1c4e6a10bdbab01f33fff9d78816ee68cf9a9a731f07668afd546a79924cb80.css"
+    integrity="sha256-scTmoQvbqwHzP/&#43;deIFu5oz5qacx8HZor9VGp5kky4A="
+    crossorigin="anonymous"
+    type="text/css"
+  />
+  
+  <link
+    rel="stylesheet"
+    href="/fontawesome/css/solid.min.423dee17c62f55fa733a4ee13e00d523dfce88cc4f4ab4549a24ba36bd9de681.css"
+    integrity="sha256-Qj3uF8YvVfpzOk7hPgDVI9/OiMxPSrRUmiS6Nr2d5oE="
+    crossorigin="anonymous"
+    type="text/css"
+  />
+  
+  <link
+    rel="stylesheet"
+    href="/fontawesome/css/brands.min.b7d54133b27e5b4de15245b8e143de3e8ed2d674c706137274cedc9953f31917.css"
+    integrity="sha256-t9VBM7J&#43;W03hUkW44UPePo7S1nTHBhNydM7cmVPzGRc="
+    crossorigin="anonymous"
+    type="text/css"
+  />
+  
+  <link rel="shortcut icon" href="/favicons/favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
+
+  <link rel="canonical" href="https://example.com/post/principal-components-analysis-collegiate-sports/" />
+
+  
+  
+  
+  
+  <script
+    type="text/javascript"
+    src="/js/anatole-header.min.5c846cefa5ed21cceee981c70901aaf21b17b4e0b05bd777af840780918abea9.js"
+    integrity="sha256-XIRs76XtIczu6YHHCQGq8hsXtOCwW9d3r4QHgJGKvqk="
+    crossorigin="anonymous"
+  ></script>
+
+  
+    
+    
+    <script
+      type="text/javascript"
+      src="/js/anatole-theme-switcher.min.245da778410d349aba672975fe9ff04e24e608155cc9102b5c1c70554c1539c0.js"
+      integrity="sha256-JF2neEENNJq6Zyl1/p/wTiTmCBVcyRArXBxwVUwVOcA="
+      crossorigin="anonymous"
+    ></script>
+
+  
+
+  
+
+
+  
+  <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://example.com/images/site-feature-image.png"/>
+
+<meta name="twitter:title" content="Principal Components Analysis in R: College Sports"/>
+<meta name="twitter:description" content="Last fall, I took a multivariate statistics course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program."/>
+
+
+
+  
+  <meta property="og:title" content="Principal Components Analysis in R: College Sports" />
+<meta property="og:description" content="Last fall, I took a multivariate statistics course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://example.com/post/principal-components-analysis-collegiate-sports/" />
+<meta property="og:image" content="https://example.com/images/site-feature-image.png"/>
+<meta property="article:published_time" content="2022-03-30T00:00:00+00:00" />
+<meta property="article:modified_time" content="2022-03-30T00:00:00+00:00" /><meta property="og:site_name" content="Noelle Pablo" />
+
+
+
+  
+  
+  
+  
+  <script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "articleSection": "post",
+        "name": "Principal Components Analysis in R: College Sports",
+        "headline": "Principal Components Analysis in R: College Sports",
+        "alternativeHeadline": "",
+        "description": "
+      
+        Last fall, I took a multivariate statistics course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program.
+
+
+      
+
+
+    ",
+        "inLanguage": "en",
+        "isFamilyFriendly": "true",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/example.com\/post\/principal-components-analysis-collegiate-sports\/"
+        },
+        "author" : {
+            "@type": "Person",
+            "name": "Noelle Pablo"
+        },
+        "creator" : {
+            "@type": "Person",
+            "name": "Noelle Pablo"
+        },
+        "accountablePerson" : {
+            "@type": "Person",
+            "name": "Noelle Pablo"
+        },
+        "copyrightHolder" : {
+            "@type": "Person",
+            "name": "Noelle Pablo"
+        },
+        "copyrightYear" : "2022",
+        "dateCreated": "2022-03-30T00:00:00.00Z",
+        "datePublished": "2022-03-30T00:00:00.00Z",
+        "dateModified": "2022-03-30T00:00:00.00Z",
+        "publisher":{
+            "@type":"Organization",
+            "name": "Noelle Pablo",
+            "url": "https://example.com",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https:\/\/example.com\/favicons\/favicon-32x32.png",
+                "width":"32",
+                "height":"32"
+            }
+        },
+        "image": 
+      [
+        
+        "https://example.com/images/site-feature-image.png"
+
+
+      
+      ]
+
+    ,
+        "url" : "https:\/\/example.com\/post\/principal-components-analysis-collegiate-sports\/",
+        "wordCount" : "996",
+        "genre" : [ ],
+        "keywords" : [ 
+      
+      "pca"
+
+    
+      
+        ,
+
+      
+      "dimension reduction"
+
+    
+      
+        ,
+
+      
+      "principal components analysis"
+
+    
+      
+        ,
+
+      
+      "college sports"
+
+    ]
+    }
+  </script>
+
+
+
+</head>
+<body
+    
+      class="body theme--light"
+
+    
+  >
+    <div class="wrapper">
+      <aside
+        
+          class="wrapper__sidebar"
+
+        
+      ><div
+  class="sidebar
+    animated fadeInDown
+
+  "
+>
+  <div class="sidebar__content">
+    <div class="sidebar__introduction">
+      <img
+        class="sidebar__introduction-profileimage"
+        src="/images/linkedinpiccropped.jpg"
+        alt="profile picture"
+      />
+      
+        <div class="sidebar__introduction-title">
+          <a href="/">Noelle Pablo</a>
+        </div>
+
+      
+      <div class="sidebar__introduction-description">
+        <p></p>
+      </div>
+    </div>
+    <ul class="sidebar__list">
+      
+        <li class="sidebar__list-item">
+          <a
+            href="https://www.linkedin.com/in/noelle-pablo/"
+            target="_blank"
+            rel="noopener"
+            aria-label="Linkedin"
+            title="Linkedin"
+          >
+            <i class="fab fa-linkedin fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+
+      
+        <li class="sidebar__list-item">
+          <a
+            href="https://github.com/noellepablo"
+            target="_blank"
+            rel="noopener"
+            aria-label="GitHub"
+            title="GitHub"
+          >
+            <i class="fab fa-github fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+
+      
+        <li class="sidebar__list-item">
+          <a
+            href="mailto:noellebpablo@gmail.com"
+            target="_blank"
+            rel="noopener"
+            aria-label="e-mail"
+            title="e-mail"
+          >
+            <i class="fas fa-envelope fa-2x" aria-hidden="true"></i>
+          </a>
+        </li>
+
+      
+    </ul>
+  </div><footer class="footer footer__sidebar">
+  <ul class="footer__list">
+    <li class="footer__item">
+      &copy;
+      
+        Noelle Pablo
+        2022
+
+
+      
+    </li>
+    
+      <li class="footer__item">
+        <a
+          class="link"
+          href="/imprint/"
+          
+          title=""
+        >
+          imprint
+        </a>
+      </li>
+
+    
+  </ul>
+</footer>
+  
+  <script
+    type="text/javascript"
+    src="/js/medium-zoom.min.7d3bf3472b73d9ba107b3de37d0df8fa736593a3c6638c95eaed42006bfc0193.js"
+    integrity="sha256-fTvzRytz2boQez3jfQ34&#43;nNlk6PGY4yV6u1CAGv8AZM="
+    crossorigin="anonymous"
+  ></script></div>
+</aside>
+      <main
+        
+          class="wrapper__main"
+
+        
+      >
+        <header class="header"><div
+  class="
+    animated fadeInDown
+
+  "
+>
+  <a role="button" class="navbar-burger" data-target="navMenu" aria-label="menu" aria-expanded="false">
+    <span aria-hidden="true" class="navbar-burger__line"></span>
+    <span aria-hidden="true" class="navbar-burger__line"></span>
+    <span aria-hidden="true" class="navbar-burger__line"></span>
+  </a>
+  <nav class="nav">
+    <ul class="nav__list" id="navMenu">
+      
+      
+        
+        
+          <li class="nav__list-item">
+            <a
+              
+              href="/"
+              
+              title=""
+              >Home</a
+            >
+          </li>
+
+        
+
+
+      
+        
+        
+          <li class="nav__list-item">
+            <a
+              
+              href="/post/"
+              
+              title=""
+              >Posts</a
+            >
+          </li>
+
+        
+
+
+      
+        
+        
+          <li class="nav__list-item">
+            <a
+              
+              href="/about/"
+              
+              title=""
+              >About</a
+            >
+          </li>
+
+        
+
+
+      
+        
+        
+
+          <li class="nav__list-item">
+            <div class="optionswitch">
+              <input class="optionswitch__picker" type="checkbox" id="3" hidden />
+
+              
+              
+                
+
+
+              
+
+
+              <label class="optionswitch__label" for="3"
+                >Accomplishments <i class="fa fa-angle-down" aria-hidden="true"></i
+              ></label>
+
+              <div class="optionswitch__triangle"></div>
+              <ul class="optionswitch__list">
+                
+                  <li class="optionswitch__list-item">
+                    <a
+                      href="/certifications/"
+                      
+                      title=""
+                      >Certifications</a
+                    >
+                  </li>
+
+                
+              </ul>
+            </div>
+          </li>
+
+        
+
+
+      
+        
+        
+          <li class="nav__list-item">
+            <a
+              
+              href="/contact/"
+              
+              title=""
+              >Contact</a
+            >
+          </li>
+
+        
+
+
+      
+    </ul>
+    <ul class="nav__list nav__list--end">
+      
+      
+        <li class="nav__list-item">
+          <div class="themeswitch">
+            <a title="Switch Theme">
+              <i class="fas fa-adjust fa-fw" aria-hidden="true"></i>
+            </a>
+          </div>
+        </li>
+
+      
+    </ul>
+  </nav>
+</div>
+</header>
+  <div
+    class="post 
+      animated fadeInDown
+
+    "
+  >
+    
+    <div class="post__content">
+      <h1>Principal Components Analysis in R: College Sports</h1>
+      
+        <ul class="post__meta">
+          <li class="post__meta-item">
+            <em class="fas fa-calendar-day post__meta-icon"></em>
+            <span class="post__meta-text"
+              >
+                30/3/2022
+
+
+              
+            </span>
+          </li>
+          <li class="post__meta-item">
+            <em class="fas fa-stopwatch post__meta-icon"></em>
+            <span class="post__meta-text">5-minute read</span>
+          </li>
+        </ul>
+
+      
+<script src="https://example.com/post/principal-components-analysis-collegiate-sports/index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Last fall, I took a multivariate statistics course at the University of Kansas as part of the Applied Statistics, Analytics, and Data Science graduate program. One of the topics covered in the course was principal components analysis (PCA). PCA is commonly used when 1. there are a large number of numerical variables in a data set, and 2. the variables are strongly correlated with each other. After conducting a PCA, the correlated variables can be replaced by a smaller number of uncorrelated variables, known as the principal components. Each principal component is a linear combination of the original variables that represents most of the information, or variability, found in the original variables.</p>
+<p>For this demonstration, I am using a data set on college sports provided by the <a href="https://github.com/rfordatascience/tidytuesday/blob/master/data/2022/2022-03-29/readme.md">TidyTuesday data project</a>. This data set contains several variables on athletic participation, staffing, and finances by college, sport, and team gender. Since the numeric variables are on different scales, e.g., <code>rev_women</code> is in dollars, while <code>partic_women</code> is counts of women, they will inevitably have different variances. To account for the different variances, we will perform a PCA on the correlation matrix which uses the standardized data, as opposed to the covariance matrix which uses the non-standardized data.</p>
+<p>Let’s create a correlation heatmap using ggplot2 to visualize the correlations between the numerical variables. Figure 1 displays the Pearson correlation coefficient between all numerical variables in the college sports data set in a heatmap.</p>
+<pre class="r"><code>tuesdata &lt;-
+  tidytuesdayR::tt_load(&#39;2022-03-29&#39;)
+
+sports &lt;- tuesdata$sports %&gt;%
+  select_if(is.numeric) %&gt;%
+  select(-c(contains(&quot;code&quot;), unitid, sector_cd))
+
+sports_corr &lt;- round(cor(sports, use = &quot;complete.obs&quot;), 2) %&gt;%
+  reshape2::melt()
+
+sports_corr %&gt;%
+  ggplot(aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = value), color = &quot;white&quot;, size = 2.2) +
+  coord_fixed() +
+  scale_fill_gradient2(low = &quot;#E69F00&quot;,
+                       mid = &quot;#56B4E9&quot;,
+                       high = &quot;#009E73&quot;) +
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1)) +
+  labs(x = &quot;&quot;, y = &quot;&quot;,
+       fill = &quot;corr&quot;)</code></pre>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-2"></span>
+<img src="https://example.com/post/principal-components-analysis-collegiate-sports/index_files/figure-html/unnamed-chunk-2-1.png" alt="College sports data correlation heatmap" width="672" />
+<p class="caption">
+Figure 1: College sports data correlation heatmap
+</p>
+</div>
+<p>From the heatmap, we can see strong linear correlations between several variables, such as: total number of female students (<code>ef_female_count</code>) and total number of male students (<code>ef_male_count)</code> (r = 0.94), number of women participants (<code>partic_women</code>) and number of male participants (<code>partic_male</code>) (r = 0.96), and revenue in USD for men (<code>rev_men</code>) and revenue in USD for women (<code>rev_women</code>) (r = 0.97). Pairs of variables with a correlation of nearly 1 are those that are used to calculate each other, for example, <code>total_rev_menwomen</code> is the sum of <code>rev_men</code> and <code>rev_women</code>. Let’s remove these redundant variables and proceed to the next step.</p>
+<pre class="r"><code>sports_data &lt;- 
+  sports %&gt;%
+  select(-contains(&quot;total&quot;), -contains(&quot;sum&quot;))</code></pre>
+<p>We can use the <code>prcomp()</code> function with the <code>scale.</code> argument set to <code>TRUE</code> to run our PCA on the normalized data. We can also use the <code>na.omit()</code> function to remove missing values. Due to the large amount of missing values in this data set, we are left with 16 complete observations.</p>
+<p>The first four principal components account for 93.5% of the total variability in the original variables, in other words, we can explain most of the variability in the data using four principal components, rather than the original 13 variables.</p>
+<pre class="r"><code>sports_pc &lt;- prcomp(na.omit(sports_data), scale. = TRUE)
+summary(sports_pc)</code></pre>
+<pre><code>## Importance of components:
+##                           PC1    PC2    PC3     PC4     PC5    PC6     PC7
+## Standard deviation     2.2227 1.5959 1.3281 1.01933 0.60966 0.5410 0.17617
+## Proportion of Variance 0.4491 0.2315 0.1603 0.09446 0.03379 0.0266 0.00282
+## Cumulative Proportion  0.4491 0.6806 0.8410 0.93544 0.96923 0.9958 0.99865
+##                            PC8     PC9    PC10      PC11
+## Standard deviation     0.11813 0.02903 0.00206 0.0007071
+## Proportion of Variance 0.00127 0.00008 0.00000 0.0000000
+## Cumulative Proportion  0.99992 1.00000 1.00000 1.0000000</code></pre>
+<p>As a reminder, the principal components are linear combinations of the original variables that aim to contain most of the information and variability present in the original variables. The <code>prcomp()</code> function also saves the weights given to each variable within each component in the <code>rotation</code> element of the <code>prcomp()</code> output. We can see that the largest positive weights in the first principal component are for the revenue and expenditure variables. In the second principal component, the largest negative weight is for year, followed by the coed participation variables. These weights are then used to calculate principal component scores.</p>
+<pre class="r"><code>sports_pc$rotation[, 1:4]</code></pre>
+<pre><code>##                           PC1         PC2         PC3         PC4
+## year               0.08046550 -0.52461564  0.09271418 -0.12001052
+## ef_male_count     -0.24314197  0.13690902 -0.54595277  0.32460550
+## ef_female_count   -0.25016590  0.02608413 -0.59768741  0.15966536
+## partic_men         0.27528119  0.34598572  0.22519978  0.43011892
+## partic_women       0.29553703  0.35072278  0.14609532  0.43437032
+## partic_coed_men   -0.10270443 -0.44259190  0.24378571  0.42958896
+## partic_coed_women -0.06919406 -0.46034026 -0.02641298  0.51493408
+## rev_men            0.42553268 -0.10892997 -0.19470486  0.05995430
+## rev_women          0.40685332 -0.12511926 -0.25329927 -0.11009306
+## exp_men            0.42558205 -0.10843060 -0.19470472  0.05983943
+## exp_women          0.40698729 -0.12475127 -0.25286576 -0.10980126</code></pre>
+<p>The principal component scores are saved in the <code>x</code> element of the <code>prcomp()</code> output. High scores on the first principal component indicate that the revenue and expenditures of that college sport are high. High scores on the second principal component indicate that the year is further in the past and that coed participation is low.</p>
+<pre class="r"><code>sports_pc$x[, 1:4]</code></pre>
+<pre><code>##              PC1        PC2         PC3         PC4
+##  [1,]  0.6299691  2.7610736  0.78941093  0.86377070
+##  [2,]  0.8820529  2.2771150  0.78977817  0.71723087
+##  [3,] -3.1135609  1.4213659 -2.75558053  0.40061779
+##  [4,]  0.8959289  1.7376713  0.89874487  0.42684134
+##  [5,]  1.9306728 -0.2859732 -0.70887921 -1.25939102
+##  [6,] -1.7094386 -0.1181410  0.89276872 -0.96397899
+##  [7,] -2.7431012  0.8567710 -2.36512376  0.09115136
+##  [8,]  0.9809652  1.0637934  0.78367389  0.03255717
+##  [9,] -1.5544257 -0.6958294  1.23024817 -0.92098308
+## [10,]  6.2495058 -0.8904998 -1.67719480  0.15392365
+## [11,] -1.2379055 -3.1809537  0.45968955  2.58756770
+## [12,] -1.5550160 -0.6634227  0.51784857 -1.05954324
+## [13,] -0.2122136 -0.7192470  0.78114954 -1.46269840
+## [14,]  1.0836685 -1.3051982 -1.23241388 -0.43238132
+## [15,]  0.2436582 -0.1845523  1.53686975  0.63695381
+## [16,] -0.7707599 -2.0739730  0.05901003  0.18836166</code></pre>
+<p>If our goal is to reduce the number of predictors in the data, we can use the first four columns of principal component scores as our transformed predictors. These four transformed predictors are now able to explain 93.5% of variability that was present in the original 13 variables. However, it is important to keep in mind that PCA only focuses on the linear relationships between the original variables, and any information in nonlinear relationships is not captured.</p>
+</div>
+    <div class="post__footer">
+      
+
+      
+        <span><a class="tag" href="/tags/pca/">pca</a><a class="tag" href="/tags/dimension-reduction/">dimension reduction</a><a class="tag" href="/tags/principal-components-analysis/">principal components analysis</a><a class="tag" href="/tags/college-sports/">college sports</a></span>
+
+
+
+
+      
+    </div>
+
+    
+  </div>
+
+
+      </main>
+    </div><footer class="footer footer__base">
+  <ul class="footer__list">
+    <li class="footer__item">
+      &copy;
+      
+        Noelle Pablo
+        2022
+
+
+      
+    </li>
+    
+      <li class="footer__item">
+        <a
+          class="link"
+          href="/imprint/"
+          
+          title=""
+        >
+          imprint
+        </a>
+      </li>
+
+    
+  </ul>
+</footer>
+  
+  <script
+    type="text/javascript"
+    src="/js/medium-zoom.min.7d3bf3472b73d9ba107b3de37d0df8fa736593a3c6638c95eaed42006bfc0193.js"
+    integrity="sha256-fTvzRytz2boQez3jfQ34&#43;nNlk6PGY4yV6u1CAGv8AZM="
+    crossorigin="anonymous"
+  ></script></body>
+</html>
